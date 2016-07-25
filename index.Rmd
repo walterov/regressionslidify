@@ -1,0 +1,75 @@
+---
+title       : Plot Linear Regressions between two Market Securities
+subtitle    : Project for the Developing Data Products Class
+author      : Walter Oliver
+job         : Data Scientist
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## Using regression in Finance
+
+1. Regression is a widely used statistical tool in economics, finance and trading
+2. Linear Regression between two stocks is useful to help make investing decisions
+3. This presentation describes a Web application that provides a regression Plot between two stocks
+
+--- .class #id 
+
+## Visualizing regression between two Stocks
+
+1. The application performs Linear Regression between two stocks and Plots the resulting Regression Line
+2. You can access the application here: https://walterov.shinyapps.io/ShinyProject/
+3. The application is interactive: it lets users enter any two stock symbols and generate the plot
+4. It does not provide the statistics of the model: coeficients, p-value, t-statistic, or residuals. This are future enhancements for the subsequent version
+
+--- .class #id 
+
+## Example of what the application allows you to do
+
+1. Assume you enter these two stock symbols: AAPL and QQQ
+2. The output will be the following plot:
+<div>
+```{r Plot, echo=FALSE, message=FALSE, warning=FALSE}
+library(quantmod)
+#load the security symbols
+#symbols examples: "AAPL", "QQQ"
+symbols <- c("AAPL", "QQQ")
+stock1 <- getSymbols(symbols[1], src='yahoo', auto.assign = FALSE)
+stock2 <- getSymbols(symbols[2], src='yahoo', auto.assign = FALSE)
+
+#define training set
+startT  <- "2007-01-01"
+endT    <- "2016-07-22"
+rangeT  <- paste(startT,"::",endT,sep ="")
+tstock1   <- stock1[,6][rangeT]
+tstock2   <- stock2[,6][rangeT]
+
+#compute price differences
+pdtstock1 <- diff(tstock1)[-1]
+pdtstock2 <- diff(tstock2)[-1]
+
+#build the model
+model  <- lm(pdtstock1 ~ pdtstock2 - 1)
+
+#plot the regression line
+plot(as.vector(pdtstock2),as.vector(pdtstock1), col = "blue", 
+     xlab = symbols[2], ylab = symbols[1],
+     main = paste(symbols[1], "vs.", symbols[2], sep = " "))
+abline(model)
+
+```
+</div>
+
+--- .class #id
+
+## Next version
+
+The next version will provide the details of the model as well. For example:
+
+```{r Summary, echo=FALSE, message=FALSE, warning=FALSE}
+summary(model)
+```
